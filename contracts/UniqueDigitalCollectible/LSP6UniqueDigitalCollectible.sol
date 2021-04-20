@@ -7,11 +7,9 @@ import "../Tokens/ERC721-UniversalReceiver.sol";
 
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
 
 contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalReceiver {
-    using EnumerableSet for EnumerableSet.UintSet;
     
     uint256 private _currentTokenID = 1;
 
@@ -43,10 +41,10 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
         return dataKeys;
     }
 
-    /* Public functions */
+    /* External functions */
 
     /**
-     * @notice Here to track allow future migration TODO remove in main chain
+     * @notice Pause Mint, MintMany, Burn functions
      */
     function pause()
     external
@@ -56,7 +54,7 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
     }
 
     /**
-     * @notice Here to track allow future migration TODO remove in main chain
+     * @notice Unpause Mint, MintMany, Burn functions
      */
     function unpause()
     external
@@ -83,11 +81,11 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
     }
 
     /**
-     @notice Mints a NFT AND when minting to a contract checks if the beneficiary is a 721 compatible
-     @param _to Recipient of the NFT
-     @return uint256 The token ID of the NFT that was minted
+     * @notice Mints a NFT AND when minting to a contract checks if the beneficiary is a 721 compatible
+     * @param _to Recipient of the NFT
+     * @return uint256 The token ID of the NFT that was minted
      */
-    function mint(address _to) public returns(uint256) {
+    function mint(address _to) external whenNotPaused returns(uint256) {
         require(_to != address(0), "LSP6UniqueDigitalCollectible.mint: Recipient is zero address");
 
         uint256 _id = _currentTokenID++;
@@ -102,11 +100,11 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
     }
 
     /**
-     @notice Mints a bunch of NFTs AND checks if the recipient contract is a 721 compatible
-     @param _to Recipient of the NFT
-     @param _amount amount of copies
+     * @notice Mints a bunch of NFT AND checks if the recipient contract is a 721 compatible
+     * @param _to Recipient of the NFT
+     * @param _amount amount of copies
      */
-    function mintMany(address _to, uint256 _amount) public {
+    function mintMany(address _to, uint256 _amount) external whenNotPaused {
         require(_to != address(0), "LSP6UniqueDigitalCollectible.mintMany: Recipient is zero address");
 
         for(uint256 i = 0 ; i < _amount; i++) {
@@ -121,11 +119,11 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
     }
 
     /**
-     @notice Burns a NFT
-     @dev Only the owner or an approved sender can call this method
-     @param _tokenId the token ID to burn
+     * @notice Burns a NFT
+     * @dev Only the owner or an approved sender can call this method
+     * @param _tokenId the token ID to burn
      */
-    function burn(uint256 _tokenId) external {
+    function burn(uint256 _tokenId) external whenNotPaused {
         require(_exists(_tokenId), "LSP6UniqueDigitalCollectible.burn: nonexistent token");
         require(
             _isApprovedOrOwner(msg.sender, _tokenId), "LSP6UniqueDigitalCollectible.burn: Only garment owner or approved"
@@ -138,11 +136,11 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
         delete creators[_tokenId];
     }
 
-    /* Internal functions */
+    /* Public functions */
 
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
+     * @notice Transfers ownership of the contract to a new account (`newOwner`).
+     * @dev Can only be called by the current owner.
      */
     function transferOwnership(address newOwner)
     public
@@ -151,4 +149,4 @@ contract LSP6UniqueDigitalCollectible is Pausable, ERC725Y, ERC721UniversalRecei
     {
         Ownable.transferOwnership(newOwner);
     }
-}   
+}
